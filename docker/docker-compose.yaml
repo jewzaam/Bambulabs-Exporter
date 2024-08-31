@@ -1,0 +1,55 @@
+services:
+  bambulabs-exporter:
+    image: bambulabs-exporter:compose
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bambulabs-exporter
+    ports:
+      - "9101:9101"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/:/etc/prometheus/
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --enable-feature=remote-write-receiver
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_DEFAULT_APP_MODE: development
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    restart: always
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"

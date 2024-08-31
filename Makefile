@@ -24,7 +24,7 @@ compose-up: ## Start docker compose stack detached.
 	@$(DOCKER_COMPOSE) up -d
 
 compose-logs: ## Tail logs of docker compose stack.
-	@$(DOCKER_COMPOSE) logs
+	@$(DOCKER_COMPOSE) logs -f
 
 compose-stop: ## Stop docker compose stack.
 	@$(DOCKER_COMPOSE) stop
