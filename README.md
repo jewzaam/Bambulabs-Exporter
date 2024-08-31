@@ -1,19 +1,31 @@
-
 # Bambulabs Exporter
 
-This is a prometheus exporter for all the data peeps that want to know all the things about their
-awesome BambuLabs 3D Printer.
+- [Supported Models](#supported-models)
+- [Collected Metrics](#collected-metrics)
+- [Steps to run the exporter](#steps-to-run-the-exporter)
+  - [Step 0: Prereqs](#step-0-prereqs)
+  - [Step 1: env File](#step-1-env-file)
+  - [Step 2: Clone the repo](#step-2-clone-the-repo)
+  - [Step 3: Run Docker Compose](#step-3-run-docker-compose)
+- [Bugs](#bugs)
+- [Feature Changes](#feature-changes)
+- [Future Development](#future-development)
+- [Credit](#credit)
+- [Support Questions](#support-questions)
 
-NOTE: This was only tested on the X1C.
+This repository hosts a Prometheus Exporter for Bambu Labs 3D printers written in Go. It collects
+metrics from the device MQTT report topic.
 
-Supported BambuLabs X1 Firmware: `1.04.01.00`.
+A Docker image is available at: <https://hub.docker.com/r/aetrius/bambulabs-exporter>.
 
-## GO, DOCKER, & PROMETHEUS ⚡ Powered
+## Supported Models
 
-This is a Prometheus Metric Exporter powered by Go & Docker. A Docker image is available at:
-<https://hub.docker.com/r/aetrius/bambulabs-exporter>.
+| Model | Tested Firmware |
+| ----- | --------------: |
+| A1    |     01.03.01.00 |
+| X1    |     01.04.01.00 |
 
-### Prometheus Metrics
+## Collected Metrics
 
 > [!TIP]
 > Sample Metrics available [here](sample.md).
@@ -48,19 +60,13 @@ This is a Prometheus Metric Exporter powered by Go & Docker. A Docker image is a
 > [!TIP]
 > Also available: [Exporter Setup Video](https://www.youtube.com/watch?v=E80Y5kTJaNM&ab_channel=TylerBennet).
 
-1. [Prereqs](#step-0-prereqs)
-2. [Create the env file](#step-1-env-file)
-3. [Clone the Repo](#step-2-clone-the-repo)
-4. [Run Docker Compose](#step-3-run-docker-compose)
-
 ### Step 0: Prereqs
 
 This project assumes you have a Grafana/Prometheus Setup. You would point your Prometheus instance
-to the (host:9101) endpoint. This is not a tutorial on Prometheus / Grafana. Click [here](README-FULLSTACK.md)
-for a full stack that includes Prometheus + Grafana + exporter for this.
+to the (host:9101) endpoint.
 
 This program/container would run on a virtual host, raspberry pi, or a computer that has access to
-the BambuLabs printer. IT is possible to port forward your printer and host this in AWS or off-premise.
+the BambuLabs printer. It is possible to port forward your printer and host this in AWS or off-premise.
 
 - Install Git (only for windows)
 - Install Docker
@@ -68,30 +74,39 @@ the BambuLabs printer. IT is possible to port forward your printer and host this
 
 ### Step 1: env File
 
-Create an .env file.
-Add the Printer IP you configured when you setup your printer.
-Add the Printer Password from the Printer Network Settings Menu.
-Add the MQTT_TOPIC for your printer. This can be achived by loading up an MQTT Application such as
-MQTT Explorer.
-
-- You must Enable (TLS), use the protocol mqtt://, add the port 8883, username bblp, and the password
-  on your printer.
-- *Please note you can regenerate a password on the device manually.
-- Collect the MQTT_TOPIC by expanding the "Device", "Serial Number", "Report". The result should look
-  similar to "device/00M00A2B08124765/report"
+- Create an .env file.
+- Add the Printer IP you configured when you setup your printer.
+- Add the Printer Password from the Printer Network Settings Menu.
+- Add the MQTT_TOPIC for your printer.
 
 ```env
 # EXAMPLE .ENV FILE
-BAMBU_PRINTER_IP=
-USERNAME="bblp"
-PASSWORD=
-MQTT_TOPIC="device/00M00A2B08124765/report"
+BAMBU_PRINTER_IP=192.168.0.1
+USERNAME=bblp
+PASSWORD=12345678
+MQTT_TOPIC=device/00M00A2B08124765/report
 ```
+
+This can be tested using an MQTT application such as [MQTT Explorer](https://mqtt-explorer.com/).
+
+- To connect, you must:
+  - Enable (TLS).
+  - Use the protocol `mqtt://`.
+  - Set the port to 8883.
+  - Set username `bblp`.
+  - Set password.
+    - For Bambu Labs A1, password is found under Settings -> LAN Only Mode -> Access Code.
+    - Please note that you can regenerate a password on the device manually.
+  - Select Advanced, remove all existing topics and add a new one like `device/[PrinterSerialNumber]/report`.
+  - Click Connect.
+- Collect the MQTT_TOPIC by expanding the "Device", "Serial Number", "Report". The result should look
+  similar to `device/00M00A2B08124765/report`.
 
 ### Step 2: Clone the repo
 
 ```bash
 git clone https://github.com/Aetrius/Bambulabs-Exporter.git
+cd Bambulabs-Exporter
 ```
 
 ### Step 3: Run Docker Compose
@@ -101,15 +116,12 @@ git clone https://github.com/Aetrius/Bambulabs-Exporter.git
 > from the printer interface manually, or reset it on the printer itself.
 
 ```bash
-cd Bambulabs-Exporter
-docker-compose up -d
+docker-compose -f docker/docker-compose-yaml up -d
+
+# or with make
+make compose-up
+make compose-logs
 ```
-
-### Prometheus Ingestion
-
-Setup prometheus to scrape the node and setup the ports to pull from port 9101.
-
-Configuration files can be found in [monitoring](./monitoring/).
 
 ## Bugs
 
@@ -119,7 +131,7 @@ Configuration files can be found in [monitoring](./monitoring/).
 
 - 5/28/2023 - Added Healthz endpoint
 - 3/31/2023 - Added support for passing env vars to the container instead of the .env file. This helps when using a docker-compose file to pass vars OR in a kubernetes manifest to pass the vars. More to come on documentation.
-- 3/4/2023 - Added new Metrics ams_humidity, ams_temp, ams_tray_color, ams_bed_temp. These include ams number and tray numbers to be dynamic depending on how many AMS's are included. Will push new container to dockerhub later today 3/4/23
+- 3/4/2023 - Added new Metrics `ams_humidity`, `ams_temp`, `ams_tray_color`, `ams_bed_temp`. These include ams number and tray numbers to be dynamic depending on how many AMS's are included. Will push new container to dockerhub later today 3/4/23
 - 2/28/2023 - Initial Metrics released. Further re-work needed to account for all the useful metrics available.
 
 ## Future Development
