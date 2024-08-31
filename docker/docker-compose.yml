@@ -1,0 +1,15 @@
+services:
+  bambulabs-exporter:
+    image: bambulabs-exporter:compose
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bambulabs-exporter
+    ports:
+      - "9101:9101"
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

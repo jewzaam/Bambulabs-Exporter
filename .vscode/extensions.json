@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "golang.go",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-docker",
+        "shardulm94.trailing-spaces",
+        "timonwong.shellcheck",
+        "usernamehw.errorlens",
+        "yzhang.markdown-all-in-one",
+    ]
+}

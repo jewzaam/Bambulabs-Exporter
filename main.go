@@ -14,7 +14,6 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/joho/godotenv"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -27,9 +26,6 @@ var password string
 var broker string
 var mqtt_topic string
 
-// var humidity float64
-// var ams_temp float64
-// var ams_bed_temp float64
 var layer_number float64
 var print_error float64
 
@@ -42,7 +38,6 @@ var cooling_fan_speed float64
 var fail_reason float64
 var fan_gear float64
 
-// var gcode_state string
 var mc_percent float64
 var mc_print_error_code float64
 var mc_print_stage float64
@@ -51,23 +46,20 @@ var mc_remaining_time float64
 var nozzle_target_temper float64
 var nozzle_temper float64
 
-var unmarshal bool
-
 type bambulabsCollector struct {
-	amsHumidityMetric     *prometheus.Desc
-	amsTempMetric         *prometheus.Desc
-	amsBedTempMetric      *prometheus.Desc
-	amsColorMetric        *prometheus.Desc //Custom color metric with multiple labels
-	layerNumberMetric     *prometheus.Desc
-	printErrorMetric      *prometheus.Desc
-	wifiSignalMetric      *prometheus.Desc
-	bigFan1SpeedMetric    *prometheus.Desc
-	bigFan2SpeedMetric    *prometheus.Desc
-	chamberTemperMetric   *prometheus.Desc
-	coolingFanSpeedMetric *prometheus.Desc
-	failReasonMetric      *prometheus.Desc
-	fanGearMetric         *prometheus.Desc
-	//gCodeStateMetric       *prometheus.Desc
+	amsHumidityMetric        *prometheus.Desc
+	amsTempMetric            *prometheus.Desc
+	amsBedTempMetric         *prometheus.Desc
+	amsColorMetric           *prometheus.Desc //Custom color metric with multiple labels
+	layerNumberMetric        *prometheus.Desc
+	printErrorMetric         *prometheus.Desc
+	wifiSignalMetric         *prometheus.Desc
+	bigFan1SpeedMetric       *prometheus.Desc
+	bigFan2SpeedMetric       *prometheus.Desc
+	chamberTemperMetric      *prometheus.Desc
+	coolingFanSpeedMetric    *prometheus.Desc
+	failReasonMetric         *prometheus.Desc
+	fanGearMetric            *prometheus.Desc
 	mcPercentMetric          *prometheus.Desc
 	mcPrintErrorCodeMetric   *prometheus.Desc
 	mcPrintStageMetric       *prometheus.Desc
@@ -77,14 +69,13 @@ type bambulabsCollector struct {
 	nozzleTemperMetric       *prometheus.Desc
 }
 
+// TODO: return error
+// TODO: load env file once
 func env(key string) string {
 	// load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-
 	return os.Getenv(key)
 }
 
@@ -232,7 +223,7 @@ func (collector *bambulabsCollector) Collect(ch chan<- prometheus.Metric) {
 	defer token.Done()
 	//fmt.Printf("\nHumidity: %s", data.Print.Ams.Ams[0].Humidity)
 
-	if reflect.ValueOf(data).IsZero() == true {
+	if reflect.ValueOf(data).IsZero() {
 		//Loop through the AMS
 		for x := 0; x < len(datav2.Print.Ams.Ams); x++ {
 
@@ -372,7 +363,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 
 func main() {
 	dt := time.Now()
-	fmt.Printf("\nStarting Exporter: ", dt.String())
+	fmt.Printf("\nStarting Exporter: %s", dt.String())
 	godotenv.Load()
 
 	broker = env("BAMBU_PRINTER_IP")
@@ -415,7 +406,7 @@ const body = `<html>
 			  </html>`
 
 func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, body)
+	fmt.Fprint(w, body)
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {

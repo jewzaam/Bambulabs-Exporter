@@ -1,0 +1,6 @@
+{
+    "window.title": "${dirty}${rootName}",
+    "markdown.extension.toc.levels": "2..6",
+    "editor.formatOnSave": true,
+    "docker.languageserver.formatter.ignoreMultilineInstructions": true
+}
