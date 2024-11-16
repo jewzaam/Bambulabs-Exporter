@@ -31,6 +31,7 @@ compose-stop: ## Stop docker compose stack.
 
 compose-down: ## Destroy docker compose stack.
 	@$(DOCKER_COMPOSE) down --volumes
+	@docker rmi bambulabs-exporter:compose
 
 ##@ Go
 
