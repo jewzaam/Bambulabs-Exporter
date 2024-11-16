@@ -372,7 +372,7 @@ func main() {
 	password = env("PASSWORD")
 	mqtt_topic = env("MQTT_TOPIC")
 	var mqtt_port_str = env("MQTT_PORT")
-	exporter_port = env("PORT")
+	exporter_port = env("EXPORTER_PORT")
 
 	if broker == "" {
 		broker = os.Getenv("BAMBU_PRINTER_IP")
