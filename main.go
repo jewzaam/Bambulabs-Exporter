@@ -223,6 +223,8 @@ func (collector *bambulabsCollector) Collect(ch chan<- prometheus.Metric) {
 	defer client.Disconnect(250)
 	defer token.Done()
 	//fmt.Printf("\nHumidity: %s", data.Print.Ams.Ams[0].Humidity)
+	data_str, _ := json.Marshal(data)
+	fmt.Printf("\nDATA: %s", data_str)
 
 	if reflect.ValueOf(data).IsZero() {
 		//Loop through the AMS

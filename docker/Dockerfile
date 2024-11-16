@@ -15,9 +15,10 @@ WORKDIR /app
 
 COPY --from=build /app/bambulabs-exporter ./
 COPY .env ./
-COPY docker/docker-entrypoint.sh /
+COPY docker/docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 9101
 
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
+ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 CMD [ "bambulabs-exporter" ]
