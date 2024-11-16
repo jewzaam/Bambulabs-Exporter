@@ -25,6 +25,8 @@ var username string
 var password string
 var broker string
 var mqtt_topic string
+var mqtt_port int
+var exporter_port string
 
 var layer_number float64
 var print_error float64
@@ -197,9 +199,8 @@ func (collector *bambulabsCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *bambulabsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	//var broker = broker
-	var port = 8883
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("ssl://%s:%d", broker, port))
+	opts.AddBroker(fmt.Sprintf("ssl://%s:%d", broker, mqtt_port))
 	opts.SetClientID("go_mqtt_client")
 	opts.SetUsername(username)
 	opts.SetPassword(password)
@@ -370,6 +371,8 @@ func main() {
 	username = env("USERNAME")
 	password = env("PASSWORD")
 	mqtt_topic = env("MQTT_TOPIC")
+	var mqtt_port_str = env("MQTT_PORT")
+	exporter_port = env("PORT")
 
 	if broker == "" {
 		broker = os.Getenv("BAMBU_PRINTER_IP")
@@ -383,6 +386,21 @@ func main() {
 		mqtt_topic = os.Getenv("MQTT_TOPIC")
 	}
 
+	if mqtt_port_str == "" {
+		mqtt_port_str = "8883"
+	}
+
+	// Convert MQTT port from string to integer
+	i, err := strconv.Atoi(mqtt_port_str)
+	if err != nil {
+		log.Fatalf("Error converting mqtt_port %s to integer\n", mqtt_port_str)
+	}
+	mqtt_port = i
+
+	if exporter_port == "" {
+		exporter_port = "9101"
+	}
+
 	fmt.Printf("\nEnv Vars Loaded")
 
 	fmt.Printf("\nRegistering collector")
@@ -391,7 +409,7 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/healthz", healthz)
 	http.Handle("/metrics", promhttp.Handler())
-	log.Fatal(http.ListenAndServe(":9101", nil))
+	log.Fatal(http.ListenAndServe(":"+exporter_port, nil))
 }
 
 const body = `<html>
